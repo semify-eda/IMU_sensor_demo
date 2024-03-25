@@ -66,7 +66,7 @@ axl_fs = {'2g': 0b00,
           }
 
 io_exp_front = [[0xf7, 0xef], [0xf3, 0xcf], [0xf1, 0x8f], [0xf0, 0x0f]]  # 0 - front, 1 - back
-io_exp_side = [[0xf7, 0xef], [0xf3, 0xcf], [0xf1, 0x8f], [0xf0, 0x0f]]  # 0 - left, 1 - right
+io_exp_side = [[0xf7, 0xef], [0xf3, 0xcf], [0xf1, 0x8f], [0xf0, 0x0f]]  # 1 - left, 0 - right
 
 
 def io_led_toggle(i2c, i2c_addr, x_res, y_res):
@@ -95,40 +95,40 @@ def io_led_toggle(i2c, i2c_addr, x_res, y_res):
         i2c.write(i2c_addr, [io_exp_front[3][0], 0xff])
 
     elif (-3 < y_res < -1) and (1 < x_res < 3):
-        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[0][0]])
+        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[0][1]])
     elif (-6 < y_res < -3) and (1 < x_res < 3):
-        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[0][0]])
+        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[0][1]])
     elif (-8 < y_res < -6) and (1 < x_res < 3):
-        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[0][0]])
+        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[0][1]])
     elif (y_res < -8) and (1 < x_res < 3):
-        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[0][0]])
+        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[0][1]])
 
     elif (-3 < y_res < -1) and (3 < x_res < 6):
-        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[1][0]])
+        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[1][1]])
     elif (-6 < y_res < -3) and (3 < x_res < 6):
-        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[1][0]])
+        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[1][1]])
     elif (-8 < y_res < -6) and (3 < x_res < 6):
-        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[1][0]])
+        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[1][1]])
     elif (y_res < -8) and (3 < x_res < 6):
-        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[1][0]])
+        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[1][1]])
 
     elif (-3 < y_res < -1) and (6 < x_res < 8):
-        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[2][0]])
+        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[2][1]])
     elif (-6 < y_res < -3) and (6 < x_res < 8):
-        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[2][0]])
+        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[2][1]])
     elif (-8 < y_res < -6) and (6 < x_res < 8):
-        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[2][0]])
+        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[2][1]])
     elif (y_res < -8) and (6 < x_res < 8):
-        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[2][0]])
+        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[2][1]])
 
     elif (-3 < y_res < -1) and (x_res >= 8):
-        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[3][0]])
+        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[3][1]])
     elif (-6 < y_res < -3) and (x_res > 8):
-        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[3][0]])
+        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[3][1]])
     elif (-8 < y_res < -6) and (x_res >= 8):
-        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[3][0]])
+        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[3][1]])
     elif (y_res < -8) and (x_res >= 8):
-        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[3][0]])
+        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[3][1]])
 
     # Tilting Forwards and Right
     elif (-3 < y_res < -1) and (-1 < x_res < 1):
@@ -141,134 +141,134 @@ def io_led_toggle(i2c, i2c_addr, x_res, y_res):
         i2c.write(i2c_addr, [io_exp_front[3][0], 0xff])
 
     elif (-3 < y_res < -1) and (-3 < x_res < -1):
-        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[0][1]])
+        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[0][0]])
     elif (-6 < y_res < -3) and (-3 < x_res < -1):
-        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[0][1]])
+        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[0][0]])
     elif (-8 < y_res < -6) and (-3 < x_res < -1):
-        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[0][1]])
+        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[0][0]])
     elif (y_res < -8) and (-3 < x_res < -1):
-        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[0][1]])
+        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[0][0]])
 
     elif (-3 < y_res < -1) and (-6 < x_res < -3):
-        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[1][1]])
+        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[1][0]])
     elif (-6 < y_res < -3) and (-6 < x_res < -3):
-        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[1][1]])
+        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[1][0]])
     elif (-8 < y_res < -6) and (-6 < x_res < -3):
-        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[1][1]])
+        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[1][0]])
     elif (y_res < -8) and (-6 < x_res < -3):
-        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[1][1]])
+        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[1][0]])
 
     elif (-3 < y_res < -1) and (-8 < x_res < -6):
-        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[2][1]])
+        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[2][0]])
     elif (-6 < y_res < -3) and (-8 < x_res < -6):
-        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[2][1]])
+        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[2][0]])
     elif (-8 < y_res < -6) and (-8 < x_res < -6):
-        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[2][1]])
+        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[2][0]])
     elif (y_res < -8) and (-8 < x_res < -6):
-        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[2][1]])
+        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[2][0]])
 
     elif (-3 < y_res < -1) and (x_res < -8):
-        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[3][1]])
+        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[3][0]])
     elif (-6 < y_res < -3) and (x_res < -8):
-        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[3][1]])
+        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[3][0]])
     elif (-8 < y_res < -6) and (x_res < -8):
-        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[3][1]])
+        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[3][0]])
     elif (y_res < -8) and (x_res < -8):
-        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[3][1]])
+        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[3][0]])
 
     #########################################################################
 
     # Tilting Right and Forwards
     elif (-3 < x_res < -1) and (-1 < y_res < 1):
-        i2c.write(i2c_addr, [0xff, io_exp_side[0][1]])
+        i2c.write(i2c_addr, [0xff, io_exp_side[0][0]])
     elif (-6 < x_res < -3) and (-1 < y_res < 1):
-        i2c.write(i2c_addr, [0xff, io_exp_side[1][1]])
+        i2c.write(i2c_addr, [0xff, io_exp_side[1][0]])
     elif (-8 < x_res < -6) and (-1 < y_res < 1):
-        i2c.write(i2c_addr, [0xff, io_exp_side[2][1]])
+        i2c.write(i2c_addr, [0xff, io_exp_side[2][0]])
     elif (x_res < -8) and (-1 < y_res < 1):
-        i2c.write(i2c_addr, [0xff, io_exp_side[3][1]])
+        i2c.write(i2c_addr, [0xff, io_exp_side[3][0]])
 
     elif (-3 < x_res < -1) and (-3 < y_res < -1):
-        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[0][1]])
+        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[0][0]])
     elif (-6 < x_res < -3) and (-3 < y_res < -1):
-        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[1][1]])
+        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[1][0]])
     elif (-8 < x_res < -6) and (-3 < y_res < -1):
-        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[2][1]])
+        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[2][0]])
     elif (x_res < -8) and (-3 < y_res < -1):
-        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[3][1]])
+        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[3][0]])
 
     elif (-3 < x_res < -1) and (-6 < y_res < -3):
-        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[0][1]])
+        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[0][0]])
     elif (-6 < x_res < -3) and (-6 < y_res < -3):
-        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[1][1]])
+        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[1][0]])
     elif (-8 < x_res < -6) and (-6 < y_res < -3):
-        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[2][1]])
+        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[2][0]])
     elif (x_res < -8) and (-6 < y_res < -3):
-        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[3][1]])
+        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[3][0]])
 
     elif (-3 < x_res < -1) and (-8 < y_res < -6):
-        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[0][1]])
+        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[0][0]])
     elif (-6 < x_res < -3) and (-8 < y_res < -6):
-        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[1][1]])
+        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[1][0]])
     elif (-8 < x_res < -6) and (-8 < y_res < -6):
-        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[2][1]])
+        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[2][0]])
     elif (x_res < -8) and (-8 < y_res < -6):
-        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[3][1]])
+        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[3][0]])
 
     elif (-3 < x_res < -1) and (y_res < -8):
-        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[0][1]])
+        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[0][0]])
     elif (-6 < x_res < -3) and (y_res < -8):
-        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[1][1]])
+        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[1][0]])
     elif (-7 < x_res < -6) and (y_res < -8):
-        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[2][1]])
+        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[2][0]])
     elif (x_res < -8) and (y_res < -8):
-        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[3][1]])
+        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[3][0]])
 
     # Tilting Left and Forwards
     elif (1 < x_res < 3) and (-1 < y_res < 1):
-        i2c.write(i2c_addr, [0xff, io_exp_side[0][0]])
+        i2c.write(i2c_addr, [0xff, io_exp_side[0][1]])
     elif (3 < x_res < 6) and (-1 < y_res < 1):
-        i2c.write(i2c_addr, [0xff, io_exp_side[1][0]])
+        i2c.write(i2c_addr, [0xff, io_exp_side[1][1]])
     elif (6 < x_res < 8) and (-1 < y_res < 1):
-        i2c.write(i2c_addr, [0xff, io_exp_side[2][0]])
+        i2c.write(i2c_addr, [0xff, io_exp_side[2][1]])
     elif (x_res >= 8) and (-1 < y_res < 1):
-        i2c.write(i2c_addr, [0xff, io_exp_side[3][0]])
+        i2c.write(i2c_addr, [0xff, io_exp_side[3][1]])
 
     elif (1 < x_res < 3) and (-3 < y_res < -1):
-        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[0][0]])
+        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[0][1]])
     elif (3 < x_res < 6) and (-3 < y_res < -1):
-        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[1][0]])
+        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[1][1]])
     elif (6 < x_res < 8) and (-3 < y_res < -1):
-        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[2][0]])
+        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[2][1]])
     elif (x_res >= 8) and (-3 < y_res < -1):
-        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[3][0]])
+        i2c.write(i2c_addr, [io_exp_front[0][0], io_exp_side[3][1]])
 
     elif (1 < x_res < 3) and (-6 < y_res < -3):
-        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[0][0]])
+        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[0][1]])
     elif (3 < x_res < 6) and (-6 < y_res < -3):
-        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[1][0]])
+        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[1][1]])
     elif (6 < x_res < 8) and (-6 < y_res < -3):
-        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[2][0]])
+        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[2][1]])
     elif (x_res >= 8) and (-6 < y_res < -3):
-        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[3][0]])
+        i2c.write(i2c_addr, [io_exp_front[1][0], io_exp_side[3][1]])
 
     elif (1 < x_res < 3) and (-8 < y_res < -6):
-        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[0][0]])
+        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[0][1]])
     elif (3 < x_res < 6) and (-8 < y_res < -6):
-        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[1][0]])
+        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[1][1]])
     elif (6 < x_res < 8) and (-8 < y_res < -6):
-        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[2][0]])
+        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[2][1]])
     elif (x_res >= 8) and (-8 < y_res < -6):
-        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[3][0]])
+        i2c.write(i2c_addr, [io_exp_front[2][0], io_exp_side[3][1]])
 
     elif (1 < x_res < 3) and (y_res < - 8):
-        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[0][0]])
+        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[0][1]])
     elif (3 < x_res < 6) and (y_res < - 8):
-        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[1][0]])
+        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[1][1]])
     elif (6 < x_res < 8) and (y_res < - 8):
-        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[2][0]])
+        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[2][1]])
     elif (x_res >= 8) and (y_res < - 8):
-        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[3][0]])
+        i2c.write(i2c_addr, [io_exp_front[3][0], io_exp_side[3][1]])
 
     #########################################################################
 
@@ -283,40 +283,40 @@ def io_led_toggle(i2c, i2c_addr, x_res, y_res):
         i2c.write(i2c_addr, [io_exp_front[3][1], 0xff])
 
     elif (1 < y_res < 3) and (1 < x_res < 3):
-        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[0][0]])
+        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[0][1]])
     elif (3 < y_res < 6) and (1 < x_res < 3):
-        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[0][0]])
+        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[0][1]])
     elif (6 < y_res < 8) and (1 < x_res < 3):
-        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[0][0]])
+        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[0][1]])
     elif (y_res >= 8) and (1 < x_res < 3):
         i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[0][1]])
 
     elif (1 < y_res < 3) and (3 < x_res < 6):
-        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[1][0]])
+        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[1][1]])
     elif (3 < y_res < 6) and (3 < x_res < 6):
-        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[1][0]])
+        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[1][1]])
     elif (6 < y_res < 8) and (3 < x_res < 6):
-        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[1][0]])
+        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[1][1]])
     elif (y_res >= 8) and (3 < x_res < 6):
-        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[1][0]])
+        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[1][1]])
 
     elif (1 < y_res < 3) and (6 < x_res < 8):
-        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[2][0]])
+        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[2][1]])
     elif (3 < y_res < 6) and (6 < x_res < 8):
-        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[2][0]])
+        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[2][1]])
     elif (6 < y_res < 8) and (6 < x_res < 8):
-        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[2][0]])
+        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[2][1]])
     elif (y_res >= 8) and (6 < x_res < 8):
-        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[2][0]])
+        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[2][1]])
 
     elif (1 < y_res < 3) and (x_res >= 8):
-        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[3][0]])
+        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[3][1]])
     elif (3 < y_res < 6) and (x_res >= 8):
-        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[3][0]])
+        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[3][1]])
     elif (6 < y_res < 8) and (x_res >= 8):
-        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[3][0]])
+        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[3][1]])
     elif (y_res >= 8) and (x_res >= 8):
-        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[3][0]])
+        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[3][1]])
 
     # Tilting Backwards and Right
     elif (1 < y_res < 3) and (-1 < x_res < 1):
@@ -329,134 +329,134 @@ def io_led_toggle(i2c, i2c_addr, x_res, y_res):
         i2c.write(i2c_addr, [io_exp_front[3][1], 0xff])
 
     elif (1 < y_res < 3) and (-3 < x_res < -1):
-        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[0][1]])
+        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[0][0]])
     elif (3 < y_res < 6) and (-3 < x_res < -1):
-        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[0][1]])
+        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[0][0]])
     elif (6 < y_res < 8) and (-3 < x_res < -1):
-        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[0][1]])
+        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[0][0]])
     if (y_res >= 8) and (-3 < x_res < -1):
-        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[0][1]])
+        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[0][0]])
 
     elif (1 < y_res < 3) and (-6 < x_res < -3):
-        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[1][1]])
+        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[1][0]])
     elif (3 < y_res < 6) and (-6 < x_res < -3):
-        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[1][1]])
+        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[1][0]])
     elif (6 < y_res < 8) and (-6 < x_res < -3):
-        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[1][1]])
+        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[1][0]])
     elif (y_res >= 8) and (-6 < x_res < -3):
-        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[1][1]])
+        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[1][0]])
 
     elif (1 < y_res < 3) and (-7 < x_res < -6):
-        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[2][1]])
+        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[2][0]])
     elif (3 < y_res < 6) and (-7 < x_res < -6):
-        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[2][1]])
+        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[2][0]])
     elif (6 < y_res < 8) and (-7 < x_res < -6):
-        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[2][1]])
+        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[2][0]])
     elif (y_res >= 8) and (-7 < x_res < -6):
-        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[2][1]])
+        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[2][0]])
 
     elif (1 < y_res < 3) and (x_res < -8):
-        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[3][1]])
+        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[3][0]])
     elif (3 < y_res < 6) and (x_res < -8):
-        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[3][1]])
+        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[3][0]])
     elif (6 < y_res < 8) and (x_res < -8):
-        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[3][1]])
+        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[3][0]])
     elif (y_res >= 8) and (x_res < -8):
-        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[3][1]])
+        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[3][0]])
 
     #########################################################################
 
     # Tilting Right and Backwards
     elif (-3 < x_res < -1) and (-1 < y_res < 1):
-        i2c.write(i2c_addr, [0xff, io_exp_side[0][1]])
+        i2c.write(i2c_addr, [0xff, io_exp_side[0][0]])
     elif (-6 < x_res < -3) and (-1 < y_res < 1):
-        i2c.write(i2c_addr, [0xff, io_exp_side[1][1]])
+        i2c.write(i2c_addr, [0xff, io_exp_side[1][0]])
     elif (-7 < x_res < -6) and (-1 < y_res < 1):
-        i2c.write(i2c_addr, [0xff, io_exp_side[2][1]])
+        i2c.write(i2c_addr, [0xff, io_exp_side[2][0]])
     elif (x_res < -8) and (-1 < y_res < 1):
-        i2c.write(i2c_addr, [0xff, io_exp_side[3][1]])
+        i2c.write(i2c_addr, [0xff, io_exp_side[3][0]])
 
     elif (-3 < x_res < -1) and (1 < y_res < 3):
-        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[0][1]])
+        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[0][0]])
     elif (-6 < x_res < -3) and (1 < y_res < 3):
-        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[1][1]])
+        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[1][0]])
     elif (-7 < x_res < -6) and (1 < y_res < 3):
-        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[2][1]])
+        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[2][0]])
     elif (x_res < -8) and (1 < y_res < 3):
-        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[3][1]])
+        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[3][0]])
 
     elif (-3 < x_res < -1) and (3 < y_res < 6):
-        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[0][1]])
+        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[0][0]])
     elif (-6 < x_res < -3) and (3 < y_res < 6):
-        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[1][1]])
+        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[1][0]])
     elif (-7 < x_res < -6) and (3 < y_res < 6):
-        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[2][1]])
+        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[2][0]])
     elif (x_res < -8) and (3 < y_res < 6):
-        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[3][1]])
+        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[3][0]])
 
     elif (-3 < x_res < -1) and (6 < y_res < 7):
-        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[0][1]])
+        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[0][0]])
     elif (-6 < x_res < -3) and (6 < y_res < 7):
-        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[1][1]])
+        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[1][0]])
     elif (-7 < x_res < -6) and (6 < y_res < 7):
-        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[2][1]])
+        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[2][0]])
     elif (x_res < -8) and (6 < y_res < 7):
-        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[3][1]])
+        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[3][0]])
 
     elif (-3 < x_res < -1) and (y_res > 8):
-        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[0][1]])
+        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[0][0]])
     elif (-6 < x_res < -3) and (y_res > 8):
-        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[1][1]])
+        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[1][0]])
     elif (-7 < x_res < -6) and (y_res > 8):
-        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[2][1]])
+        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[2][0]])
     elif (x_res < -8) and (y_res >= 8):
-        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[3][1]])
+        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[3][0]])
 
     # Tilting Left and Backwards
     elif (1 < x_res < 3) and (-1 < y_res < 1):
-        i2c.write(i2c_addr, [0xff, io_exp_side[0][0]])
+        i2c.write(i2c_addr, [0xff, io_exp_side[0][1]])
     elif (3 < x_res < 6) and (-1 < y_res < 1):
-        i2c.write(i2c_addr, [0xff, io_exp_side[1][0]])
+        i2c.write(i2c_addr, [0xff, io_exp_side[1][1]])
     elif (6 < x_res < 8) and (-1 < y_res < 1):
-        i2c.write(i2c_addr, [0xff, io_exp_side[2][0]])
+        i2c.write(i2c_addr, [0xff, io_exp_side[2][1]])
     elif (x_res >= 8) and (-1 < y_res < 1):
-        i2c.write(i2c_addr, [0xff, io_exp_side[3][0]])
+        i2c.write(i2c_addr, [0xff, io_exp_side[3][1]])
 
     elif (1 < x_res < 3) and (1 < y_res < 3):
-        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[0][0]])
+        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[0][1]])
     elif (3 < x_res < 6) and (1 < y_res < 3):
-        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[1][0]])
+        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[1][1]])
     elif (6 < x_res < 8) and (1 < y_res < 3):
-        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[2][0]])
+        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[2][1]])
     elif (x_res >= 8) and (1 < y_res < 3):
-        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[3][0]])
+        i2c.write(i2c_addr, [io_exp_front[0][1], io_exp_side[3][1]])
 
     elif (1 < x_res < 3) and (3 < y_res < 6):
-        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[0][0]])
+        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[0][1]])
     elif (3 < x_res < 6) and (3 < y_res < 6):
-        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[1][0]])
+        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[1][1]])
     elif (6 < x_res < 8) and (3 < y_res < 6):
-        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[2][0]])
+        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[2][1]])
     elif (x_res >= 8) and (3 < y_res < 6):
-        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[3][0]])
+        i2c.write(i2c_addr, [io_exp_front[1][1], io_exp_side[3][1]])
 
     elif (1 < x_res < 3) and (6 < y_res < 7):
-        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[0][0]])
+        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[0][1]])
     elif (3 < x_res < 6) and (6 < y_res < 7):
-        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[1][0]])
+        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[1][1]])
     elif (6 < x_res < 8) and (6 < y_res < 7):
-        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[2][0]])
+        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[2][1]])
     elif (x_res >= 8) and (6 < y_res < 7):
-        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[3][0]])
+        i2c.write(i2c_addr, [io_exp_front[2][1], io_exp_side[3][1]])
 
     elif (1 < x_res < 3) and (y_res >= 8):
-        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[0][0]])
+        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[0][1]])
     elif (3 < x_res < 6) and (y_res >= 8):
-        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[1][0]])
+        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[1][1]])
     elif (6 < x_res < 8) and (y_res >= 8):
-        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[2][0]])
+        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[2][1]])
     elif (x_res >= 8) and (y_res >= 8):
-        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[3][0]])
+        i2c.write(i2c_addr, [io_exp_front[3][1], io_exp_side[3][1]])
 
 
 def sound_modulation(x_res, y_res):

@@ -122,12 +122,12 @@ def main():
     """
     with SmartWave().connect() as sw:
         i2c_imu_addr = 0x6a  # Default I2C address
-        i2c_imu = sw.createI2CConfig("A1", "A2", int(200e3))
+        i2c_imu = sw.createI2CConfig("A3", "A2", int(200e3))
         imu_id = i2c_imu.readRegister(i2c_imu_addr, 0x0f.to_bytes(1, 'big'), 1)
 
         if IO_EXPANDER:
             i2c_io_exp_addr = 0x20
-            i2c_io_exp = sw.createI2CConfig("A8", "A7", int(200e3))
+            i2c_io_exp = sw.createI2CConfig("A9", "A10", int(200e3))
             i2c_io_exp.write(i2c_io_exp_addr, [0xff, 0xff])
 
         # Check if connection to the target device was successful
@@ -141,7 +141,7 @@ def main():
         gyro_conf(i2c_imu, i2c_imu_addr)
 
         # Import semify logo for plotting
-        file = "semify_logo.png"
+        file = "../../IMU_sensor_demo/python/semify_logo.png"
         img = Image.open(file)
         resize = img.resize((np.array(img.size) / 19).astype(int))  # / 17
 
@@ -270,11 +270,11 @@ def main():
             # print(f"X_adc: {pitch:.3f}     Y_adc: {roll:.3f}    Z_adc:: {yaw:.3f}")
             # print(f"X_a: {x_res:.3f} m/s^2    Y_a: {y_res:.3f} m/s^2   Z_a: {z_res:.3f} m/s^2\n")
 
-            ys[0].append(x_res)
+            ys[0].append(y_res)
             ys[0] = ys[0][-x_len:]
             line[0].set_ydata(ys[0])
 
-            ys[1].append(y_res)
+            ys[1].append(x_res)
             ys[1] = ys[1][-x_len:]
             line[1].set_ydata(ys[1])
 
@@ -283,13 +283,13 @@ def main():
             line[2].set_ydata(ys[2])
 
             if IO_EXPANDER:
-                io_led_toggle(i2c_io_exp, i2c_io_exp_addr, x_res, y_res)
+                io_led_toggle(i2c_io_exp, i2c_io_exp_addr, y_res, x_res)
 
             if PLAY_SOUND:
                 frequency = 220
                 duration = 0.1
 
-                harmonics, pitch_shift = sound_modulation(x_res, y_res)
+                harmonics, pitch_shift = sound_modulation(y_res, x_res)
 
                 signal_wave = generate_sound(frequency, duration, harmonics, pitch_shift)
 
