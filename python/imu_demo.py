@@ -160,7 +160,7 @@ def main():
         ax5 = fig.add_subplot(gs[1, 1])
         ax6 = fig.add_subplot(gs[2, 1])
 
-        fig.suptitle("Inerta Measurement Unit\nData Visualization", color=sem_white)
+        fig.suptitle("Inertial Measurement Unit\nData Visualization", color=sem_white)
         ax1.set_title("X - axis", color=sem_white)
         ax2.set_title("Y - axis", color=sem_white)
         ax3.set_title("Z - axis", color=sem_white)
