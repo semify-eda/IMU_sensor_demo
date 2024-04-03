@@ -42,8 +42,8 @@ def axl_conf(i2c, i2c_addr, odr: str = '12.5Hz', fs: str = '2g') -> None:
     :return: None
     """
     axl_reg = ((axl_odr[odr] << 4) + (axl_fs[fs] << 2))
-    i2c.writeRegister(i2c_addr, 0x10.to_bytes(1, 'big'), axl_reg.to_bytes(1, 'big'))
-    ctrl1_xl = i2c.readRegister(i2c_addr, 0x10.to_bytes(1, 'big'), 1)
+    i2c.writeRegister(i2c_addr, 0x10.to_bytes(1, 'big'), axl_reg.to_bytes(1, 'big'), timeout=None)
+    ctrl1_xl = i2c.readRegister(i2c_addr, 0x10.to_bytes(1, 'big'), 1, timeout=None)
     print(f"Accelerometer control register value: {ctrl1_xl[0]:08b}")
 
 
@@ -62,8 +62,8 @@ def gyro_conf(i2c, i2c_addr, odr: str = '12.5Hz', fs_g: str = '250_dps',
     """
     gyro_reg = ((gyro_odr[odr] << 4) + (gyro_fs_g[fs_g] << 2) +
                 (gyro_fs_125[fs_125] << 1) + gyro_fs_4000[fs_4000])
-    i2c.writeRegister(i2c_addr, 0x11.to_bytes(1, 'big'), gyro_reg.to_bytes(1, 'big'))
-    ctrl2_g = i2c.readRegister(i2c_addr, 0x11.to_bytes(1, 'big'), 1)
+    i2c.writeRegister(i2c_addr, 0x11.to_bytes(1, 'big'), gyro_reg.to_bytes(1, 'big'), timeout=None)
+    ctrl2_g = i2c.readRegister(i2c_addr, 0x11.to_bytes(1, 'big'), 1, timeout=None)
     print(f"Gyroscope control register value: {ctrl2_g[0]:08b}")
 
 
@@ -122,12 +122,12 @@ def main():
     """
     with SmartWave().connect() as sw:
         i2c_imu_addr = 0x6a  # Default I2C address
-        i2c_imu = sw.createI2CConfig("A3", "A2", int(200e3))
+        i2c_imu = sw.createI2CConfig(sda_pin_name="A2", scl_pin_name="A3", clock_speed=int(200e3))
         imu_id = i2c_imu.readRegister(i2c_imu_addr, 0x0f.to_bytes(1, 'big'), 1)
 
         if IO_EXPANDER:
             i2c_io_exp_addr = 0x20
-            i2c_io_exp = sw.createI2CConfig("A9", "A10", int(200e3))
+            i2c_io_exp = sw.createI2CConfig(sda_pin_name="A10", scl_pin_name="A9", clock_speed=int(200e3))
             i2c_io_exp.write(i2c_io_exp_addr, [0xff, 0xff])
 
         # Check if connection to the target device was successful
