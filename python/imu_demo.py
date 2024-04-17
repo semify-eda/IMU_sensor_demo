@@ -212,20 +212,44 @@ def main():
             :return: Data for plotting
             """
 
-            pitch_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x22.to_bytes(1, 'big'), 1)
-            pitch_msb = i2c_imu.readRegister(i2c_imu_addr, 0x23.to_bytes(1, 'big'), 1)
-            pitch = (pitch_msb[0] << 8) + pitch_lsb[0]
-            tc_pitch = twos_comp(pitch)
+            try:
+                pitch_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x22.to_bytes(1, 'big'), 1)
+                pitch_msb = i2c_imu.readRegister(i2c_imu_addr, 0x23.to_bytes(1, 'big'), 1)
+                pitch = (pitch_msb[0] << 8) + pitch_lsb[0]
+                tc_pitch = twos_comp(pitch)
+            except KeyboardInterrupt:
+                return
+            except:
+                pitch_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x22.to_bytes(1, 'big'), 1)
+                pitch_msb = i2c_imu.readRegister(i2c_imu_addr, 0x23.to_bytes(1, 'big'), 1)
+                pitch = (pitch_msb[0] << 8) + pitch_lsb[0]
+                tc_pitch = twos_comp(pitch)
 
-            roll_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x24.to_bytes(1, 'big'), 1)
-            roll_msb = i2c_imu.readRegister(i2c_imu_addr, 0x25.to_bytes(1, 'big'), 1)
-            roll = (roll_msb[0] << 8) + roll_lsb[0]
-            tc_roll = twos_comp(roll)
+            try:
+                roll_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x24.to_bytes(1, 'big'), 1)
+                roll_msb = i2c_imu.readRegister(i2c_imu_addr, 0x25.to_bytes(1, 'big'), 1)
+                roll = (roll_msb[0] << 8) + roll_lsb[0]
+                tc_roll = twos_comp(roll)
+            except KeyboardInterrupt:
+                return
+            except:
+                roll_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x24.to_bytes(1, 'big'), 1)
+                roll_msb = i2c_imu.readRegister(i2c_imu_addr, 0x25.to_bytes(1, 'big'), 1)
+                roll = (roll_msb[0] << 8) + roll_lsb[0]
+                tc_roll = twos_comp(roll)
 
-            yaw_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x26.to_bytes(1, 'big'), 1)
-            yaw_msb = i2c_imu.readRegister(i2c_imu_addr, 0x27.to_bytes(1, 'big'), 1)
-            yaw = (yaw_msb[0] << 8) + yaw_lsb[0]
-            tc_yaw = twos_comp(yaw)
+            try:
+                yaw_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x26.to_bytes(1, 'big'), 1)
+                yaw_msb = i2c_imu.readRegister(i2c_imu_addr, 0x27.to_bytes(1, 'big'), 1)
+                yaw = (yaw_msb[0] << 8) + yaw_lsb[0]
+                tc_yaw = twos_comp(yaw)
+            except KeyboardInterrupt:
+                return
+            except:
+                yaw_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x26.to_bytes(1, 'big'), 1)
+                yaw_msb = i2c_imu.readRegister(i2c_imu_addr, 0x27.to_bytes(1, 'big'), 1)
+                yaw = (yaw_msb[0] << 8) + yaw_lsb[0]
+                tc_yaw = twos_comp(yaw)
 
             # Angular rate conversion - returns the rate of change
             pitch_res = np.round((tc_pitch * gyro_sense['4000_dps']), 3)  # * (np.pi / 180)), 3)
@@ -247,20 +271,44 @@ def main():
             line[5].set_ydata(ys[5])
 
             # Linear acceleration sensor
-            x_axis_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x28.to_bytes(1, 'big'), 1)
-            x_axis_msb = i2c_imu.readRegister(i2c_imu_addr, 0x29.to_bytes(1, 'big'), 1)
-            x_axis = (x_axis_msb[0] << 8) + x_axis_lsb[0]
-            tc_x_axis = twos_comp(x_axis, 16)
+            try:
+                x_axis_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x28.to_bytes(1, 'big'), 1)
+                x_axis_msb = i2c_imu.readRegister(i2c_imu_addr, 0x29.to_bytes(1, 'big'), 1)
+                x_axis = (x_axis_msb[0] << 8) + x_axis_lsb[0]
+                tc_x_axis = twos_comp(x_axis, 16)
+            except KeyboardInterrupt:
+                return
+            except:
+                x_axis_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x28.to_bytes(1, 'big'), 1)
+                x_axis_msb = i2c_imu.readRegister(i2c_imu_addr, 0x29.to_bytes(1, 'big'), 1)
+                x_axis = (x_axis_msb[0] << 8) + x_axis_lsb[0]
+                tc_x_axis = twos_comp(x_axis, 16)
 
-            y_axis_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x2A.to_bytes(1, 'big'), 1)
-            y_axis_msb = i2c_imu.readRegister(i2c_imu_addr, 0x2B.to_bytes(1, 'big'), 1)
-            y_axis = (y_axis_msb[0] << 8) + y_axis_lsb[0]
-            tc_y_axis = twos_comp(y_axis, 16)
+            try:
+                y_axis_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x2A.to_bytes(1, 'big'), 1)
+                y_axis_msb = i2c_imu.readRegister(i2c_imu_addr, 0x2B.to_bytes(1, 'big'), 1)
+                y_axis = (y_axis_msb[0] << 8) + y_axis_lsb[0]
+                tc_y_axis = twos_comp(y_axis, 16)
+            except KeyboardInterrupt:
+                return
+            except:
+                y_axis_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x2A.to_bytes(1, 'big'), 1)
+                y_axis_msb = i2c_imu.readRegister(i2c_imu_addr, 0x2B.to_bytes(1, 'big'), 1)
+                y_axis = (y_axis_msb[0] << 8) + y_axis_lsb[0]
+                tc_y_axis = twos_comp(y_axis, 16)
 
-            z_axis_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x2C.to_bytes(1, 'big'), 1)
-            z_axis_msb = i2c_imu.readRegister(i2c_imu_addr, 0x2D.to_bytes(1, 'big'), 1)
-            z_axis = (z_axis_msb[0] << 8) + z_axis_lsb[0]
-            tc_z_axis = twos_comp(z_axis, 16)
+            try:
+                z_axis_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x2C.to_bytes(1, 'big'), 1)
+                z_axis_msb = i2c_imu.readRegister(i2c_imu_addr, 0x2D.to_bytes(1, 'big'), 1)
+                z_axis = (z_axis_msb[0] << 8) + z_axis_lsb[0]
+                tc_z_axis = twos_comp(z_axis, 16)
+            except KeyboardInterrupt:
+                return
+            except:
+                z_axis_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x2C.to_bytes(1, 'big'), 1)
+                z_axis_msb = i2c_imu.readRegister(i2c_imu_addr, 0x2D.to_bytes(1, 'big'), 1)
+                z_axis = (z_axis_msb[0] << 8) + z_axis_lsb[0]
+                tc_z_axis = twos_comp(z_axis, 16)
 
             # Linear acceleration conversion
             # convert from g to m/s^2 1 g-unit = 9.80665
