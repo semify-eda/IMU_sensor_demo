@@ -7,6 +7,8 @@ from PIL import Image
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from i2ct_debug import *
+import time
 
 import keyboard
 import pyaudio
@@ -21,7 +23,7 @@ matplotlib.use('TkAgg')
 IO_EXPANDER = True
 
 # If set to true, the script generates and plays a sine wave according to the IMU sensor data
-PLAY_SOUND = True
+PLAY_SOUND = False 
 
 # Color scheme for plotting
 sem_grey = '#323c40'
@@ -120,19 +122,42 @@ def main():
     for data visualization.
     :return: None
     """
-    with SmartWave().connect() as sw:
+    with SmartWave().connect(reset=False) as sw:
+        sw.debugCallback = lambda x : print(x)
         i2c_imu_addr = 0x6a  # Default I2C address
-        i2c_imu = sw.createI2CConfig(sda_pin_name="A2", scl_pin_name="A3", clock_speed=int(200e3))
-        imu_id = i2c_imu.readRegister(i2c_imu_addr, 0x0f.to_bytes(1, 'big'), 1)
+        i2c_imu = sw.createI2CConfig(sda_pin_name="A2", scl_pin_name="A3", clock_speed=int(400e3))
+        try:
+            imu_id = i2c_imu.readRegister(i2c_imu_addr, 0x0f.to_bytes(1, 'big'), 1)
+        except:
+            try:
+                imu_id = i2c_imu.readRegister(i2c_imu_addr, 0x0f.to_bytes(1, 'big'), 1)
+            except:
+                try:
+                    imu_id = i2c_imu.readRegister(i2c_imu_addr, 0x0f.to_bytes(1, 'big'), 1)
+                except:
+                    try:
+                        imu_id = i2c_imu.readRegister(i2c_imu_addr, 0x0f.to_bytes(1, 'big'), 1)
+                    except:
+                        try:
+                            imu_id = i2c_imu.readRegister(i2c_imu_addr, 0x0f.to_bytes(1, 'big'), 1)
+                        except:
+                                
+                            try:
+                                x = sw.readFPGARegister(0x880F0)
+                                debug_reg_printout(x)
+                            except:
+                                print("Unable to read contents of I2CT debug register...")
+                            SmartWave.disconnect(sw)
+                            exit("Unable to establish connection with IMU device on address 0x6a...")
 
         if IO_EXPANDER:
             i2c_io_exp_addr = 0x20
-            i2c_io_exp = sw.createI2CConfig(sda_pin_name="A10", scl_pin_name="A9", clock_speed=int(200e3))
+            i2c_io_exp = sw.createI2CConfig(sda_pin_name="A10", scl_pin_name="A9", clock_speed=int(400e3))
             i2c_io_exp.write(i2c_io_exp_addr, [0xff, 0xff])
 
         # Check if connection to the target device was successful
         if (imu_id[0] == 0xff) or (imu_id[0] == 0x00):
-            raise ValueError("Couldn't reach device. Terminating code.")
+            exit("Couldn't reach device. Terminating code.")
         else:
             print(f"Connection was successful. Device ID: {imu_id[0]:#0x}")
 
@@ -212,109 +237,123 @@ def main():
             :return: Data for plotting
             """
 
-            pitch_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x22.to_bytes(1, 'big'), 1)
-            pitch_msb = i2c_imu.readRegister(i2c_imu_addr, 0x23.to_bytes(1, 'big'), 1)
-            pitch = (pitch_msb[0] << 8) + pitch_lsb[0]
-            tc_pitch = twos_comp(pitch)
+            try:
 
-            roll_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x24.to_bytes(1, 'big'), 1)
-            roll_msb = i2c_imu.readRegister(i2c_imu_addr, 0x25.to_bytes(1, 'big'), 1)
-            roll = (roll_msb[0] << 8) + roll_lsb[0]
-            tc_roll = twos_comp(roll)
+                pitch_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x22.to_bytes(1, 'big'), 1)
+                pitch_msb = i2c_imu.readRegister(i2c_imu_addr, 0x23.to_bytes(1, 'big'), 1)
+                pitch = (pitch_msb[0] << 8) + pitch_lsb[0]
+                tc_pitch = twos_comp(pitch)
 
-            yaw_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x26.to_bytes(1, 'big'), 1)
-            yaw_msb = i2c_imu.readRegister(i2c_imu_addr, 0x27.to_bytes(1, 'big'), 1)
-            yaw = (yaw_msb[0] << 8) + yaw_lsb[0]
-            tc_yaw = twos_comp(yaw)
+                roll_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x24.to_bytes(1, 'big'), 1)
+                roll_msb = i2c_imu.readRegister(i2c_imu_addr, 0x25.to_bytes(1, 'big'), 1)
+                roll = (roll_msb[0] << 8) + roll_lsb[0]
+                tc_roll = twos_comp(roll)
 
-            # Angular rate conversion - returns the rate of change
-            pitch_res = np.round((tc_pitch * gyro_sense['4000_dps']), 3)  # * (np.pi / 180)), 3)
-            roll_res = np.round((tc_roll * gyro_sense['4000_dps']), 3)  # * (np.pi / 180)), 3)
-            yaw_res = np.round((tc_yaw * gyro_sense['4000_dps']), 3)  # * (np.pi / 180)), 3)
-            # print(f"Pitch: {tc_pitch:.3f}     Roll: {tc_roll:.3f}    Yaw: {tc_yaw:.3f}")
-            # print(f"Pitch: {pitch_res:.3f} degrees    Roll: {roll_res:.3f} degrees   Yaw: {yaw_res:.3f} degrees\n")
+                yaw_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x26.to_bytes(1, 'big'), 1)
+                yaw_msb = i2c_imu.readRegister(i2c_imu_addr, 0x27.to_bytes(1, 'big'), 1)
+                yaw = (yaw_msb[0] << 8) + yaw_lsb[0]
+                tc_yaw = twos_comp(yaw)
 
-            ys[3].append(pitch_res)
-            ys[3] = ys[3][-x_len:]
-            line[3].set_ydata(ys[3])
+                # Angular rate conversion - returns the rate of change
+                pitch_res = np.round((tc_pitch * gyro_sense['4000_dps']), 3)  # * (np.pi / 180)), 3)
+                roll_res = np.round((tc_roll * gyro_sense['4000_dps']), 3)  # * (np.pi / 180)), 3)
+                yaw_res = np.round((tc_yaw * gyro_sense['4000_dps']), 3)  # * (np.pi / 180)), 3)
+                # print(f"Pitch: {tc_pitch:.3f}     Roll: {tc_roll:.3f}    Yaw: {tc_yaw:.3f}")
+                # print(f"Pitch: {pitch_res:.3f} degrees    Roll: {roll_res:.3f} degrees   Yaw: {yaw_res:.3f} degrees\n")
 
-            ys[4].append(roll_res)
-            ys[4] = ys[4][-x_len:]
-            line[4].set_ydata(ys[4])
+                ys[3].append(pitch_res)
+                ys[3] = ys[3][-x_len:]
+                line[3].set_ydata(ys[3])
 
-            ys[5].append(yaw_res)
-            ys[5] = ys[5][-x_len:]
-            line[5].set_ydata(ys[5])
+                ys[4].append(roll_res)
+                ys[4] = ys[4][-x_len:]
+                line[4].set_ydata(ys[4])
 
-            # Linear acceleration sensor
-            x_axis_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x28.to_bytes(1, 'big'), 1)
-            x_axis_msb = i2c_imu.readRegister(i2c_imu_addr, 0x29.to_bytes(1, 'big'), 1)
-            x_axis = (x_axis_msb[0] << 8) + x_axis_lsb[0]
-            tc_x_axis = twos_comp(x_axis, 16)
+                ys[5].append(yaw_res)
+                ys[5] = ys[5][-x_len:]
+                line[5].set_ydata(ys[5])
 
-            y_axis_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x2A.to_bytes(1, 'big'), 1)
-            y_axis_msb = i2c_imu.readRegister(i2c_imu_addr, 0x2B.to_bytes(1, 'big'), 1)
-            y_axis = (y_axis_msb[0] << 8) + y_axis_lsb[0]
-            tc_y_axis = twos_comp(y_axis, 16)
+                # Linear acceleration sensor
+                x_axis_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x28.to_bytes(1, 'big'), 1)
+                x_axis_msb = i2c_imu.readRegister(i2c_imu_addr, 0x29.to_bytes(1, 'big'), 1)
+                x_axis = (x_axis_msb[0] << 8) + x_axis_lsb[0]
+                tc_x_axis = twos_comp(x_axis, 16)
 
-            z_axis_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x2C.to_bytes(1, 'big'), 1)
-            z_axis_msb = i2c_imu.readRegister(i2c_imu_addr, 0x2D.to_bytes(1, 'big'), 1)
-            z_axis = (z_axis_msb[0] << 8) + z_axis_lsb[0]
-            tc_z_axis = twos_comp(z_axis, 16)
+                y_axis_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x2A.to_bytes(1, 'big'), 1)
+                y_axis_msb = i2c_imu.readRegister(i2c_imu_addr, 0x2B.to_bytes(1, 'big'), 1)
+                y_axis = (y_axis_msb[0] << 8) + y_axis_lsb[0]
+                tc_y_axis = twos_comp(y_axis, 16)
 
-            # Linear acceleration conversion
-            # convert from g to m/s^2 1 g-unit = 9.80665
-            x_res = tc_x_axis * axl_sens['2g'] * 9.80665
-            y_res = tc_y_axis * axl_sens['2g'] * 9.80665
-            z_res = tc_z_axis * axl_sens['2g'] * 9.80665
-            # print(f"X_adc: {pitch:.3f}     Y_adc: {roll:.3f}    Z_adc:: {yaw:.3f}")
-            # print(f"X_a: {x_res:.3f} m/s^2    Y_a: {y_res:.3f} m/s^2   Z_a: {z_res:.3f} m/s^2\n")
+                z_axis_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x2C.to_bytes(1, 'big'), 1)
+                z_axis_msb = i2c_imu.readRegister(i2c_imu_addr, 0x2D.to_bytes(1, 'big'), 1)
+                z_axis = (z_axis_msb[0] << 8) + z_axis_lsb[0]
+                tc_z_axis = twos_comp(z_axis, 16)
 
-            ys[0].append(y_res)
-            ys[0] = ys[0][-x_len:]
-            line[0].set_ydata(ys[0])
+                # Linear acceleration conversion
+                # convert from g to m/s^2 1 g-unit = 9.80665
+                x_res = tc_x_axis * axl_sens['2g'] * 9.80665
+                y_res = tc_y_axis * axl_sens['2g'] * 9.80665
+                z_res = tc_z_axis * axl_sens['2g'] * 9.80665
+                # print(f"X_adc: {pitch:.3f}     Y_adc: {roll:.3f}    Z_adc:: {yaw:.3f}")
+                # print(f"X_a: {x_res:.3f} m/s^2    Y_a: {y_res:.3f} m/s^2   Z_a: {z_res:.3f} m/s^2\n")
+                print(f"x axis: {hex(x_axis)}    y axis: {hex(y_axis)}    z axis: {hex(z_axis)}")
+                # print("SoC Core Enable (0x48010): \n0x%x\n" % (int(sw.readFPGARegister(0x48010)) >> 1))
+                ys[0].append(y_res)
+                ys[0] = ys[0][-x_len:]
+                line[0].set_ydata(ys[0])
 
-            ys[1].append(x_res)
-            ys[1] = ys[1][-x_len:]
-            line[1].set_ydata(ys[1])
+                ys[1].append(x_res)
+                ys[1] = ys[1][-x_len:]
+                line[1].set_ydata(ys[1])
 
-            ys[2].append(z_res)
-            ys[2] = ys[2][-x_len:]
-            line[2].set_ydata(ys[2])
+                ys[2].append(z_res)
+                ys[2] = ys[2][-x_len:]
+                line[2].set_ydata(ys[2])
 
-            if IO_EXPANDER:
-                io_led_toggle(i2c_io_exp, i2c_io_exp_addr, y_res, x_res)
+                if IO_EXPANDER:
+                    io_led_toggle(i2c_io_exp, i2c_io_exp_addr, y_res, x_res)
 
-            if PLAY_SOUND:
-                frequency = 220
-                duration = 0.1
+                if PLAY_SOUND:
+                    frequency = 220
+                    duration = 0.1
 
-                harmonics, pitch_shift = sound_modulation(y_res, x_res)
+                    harmonics, pitch_shift = sound_modulation(y_res, x_res)
 
-                signal_wave = generate_sound(frequency, duration, harmonics, pitch_shift)
+                    signal_wave = generate_sound(frequency, duration, harmonics, pitch_shift)
 
-                p = pyaudio.PyAudio()
-                stream = p.open(format=pyaudio.paFloat32,
-                                channels=1,
-                                rate=20000,
-                                output=True)
-                stream.write(signal_wave.astype(np.float32).tobytes())
-                stream.stop_stream()
+                    p = pyaudio.PyAudio()
+                    stream = p.open(format=pyaudio.paFloat32,
+                                    channels=1,
+                                    rate=20000,
+                                    output=True)
+                    stream.write(signal_wave.astype(np.float32).tobytes())
+                    stream.stop_stream()
 
-            return line
+                return line
+
+               
+            except:
+                print("Connection to IMU unit has been interrupted. Terminating Program.")
+                try:
+                    x = sw.readFPGARegister(0x880F0)
+                    debug_reg_printout(x)
+
+                except:
+                    print("Unable to read contents of I2CT debug register...")
+                SmartWave.disconnect(sw)
+                exit()
 
         anim = animation.FuncAnimation(fig, animate,
-                                       fargs=(ys,),
-                                       interval=1,
-                                       blit=True,
-                                       cache_frame_data=False)
+                                    fargs=(ys,),
+                                    interval=1,
+                                    blit=True,
+                                    cache_frame_data=False)
 
         # plt.figimage(resize, xo=int(fig.bbox.xmax // 2) + 250, yo=int(fig.bbox.ymax) + 220)
         # plt.figimage(resize, xo=int(fig.bbox.xmax // 2) + 650, yo=int(fig.bbox.ymax) + 220)
         plt.figimage(resize, origin='upper')
         # plt.get_current_fig_manager().full_screen_toggle()
         plt.show()
-
 
 if __name__ == "__main__":
     process = Process(target=main)
@@ -323,4 +362,16 @@ if __name__ == "__main__":
         if keyboard.is_pressed('q'):
             print("Terminating code.")
             process.terminate()
+            try:
+                with SmartWave().connect(reset=False) as sw:
+                    x = sw.readFPGARegister(0x880F0)
+                    debug_reg_printout(x)
+                    SmartWave.disconnect(sw)
+                time.sleep(0.5)
+                SmartWave.connect()
+                time.sleep(0.5)
+                SmartWave.disconnect()
+                    
+            except:
+                print("Unable to read contents of I2CT debug register...")
             break
