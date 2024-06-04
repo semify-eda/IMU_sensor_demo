@@ -165,6 +165,11 @@ def generate_sound(frequency: int = 440, duration: float = 1, harmonics: int = 0
 
     return signal_wave
 
+def reset_soc(sw):
+    SOC_CTRL_REG = 0x48010
+    # assert reset SoC and block instruction fetch
+    sw.writeFPGARegister(SOC_CTRL_REG, 0b00)
+    sw.writeFPGARegister(SOC_CTRL_REG, 0b11)
 
 
 def fall_detected(sample):
@@ -210,6 +215,8 @@ def main():
             SmartWaveAPI.configitems.GPIO.color = "#1E88E5"
             sw.createGPIO("A1", "EMU SDA")
             sw.createGPIO("A7", "EMU SCL")
+
+            reset_soc(sw)
 
             enable_i2c0(sw)
             i2c_imu = sw.createI2CConfig(sda_pin_name="A2", scl_pin_name="A3", sda_display_name="IMU SDA", scl_display_name="IMU SCL", clock_speed=int(400e3))
