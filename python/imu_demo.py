@@ -16,8 +16,12 @@ import pyaudio
 from multiprocessing import Process
 
 from SmartWaveAPI import SmartWave
+import SmartWaveAPI
 from imu_conf_lib import *
 from sys import argv, exit
+from inspect import currentframe, getframeinfo
+
+
 
 try:
     com = argv[1]
@@ -27,7 +31,7 @@ except:
 matplotlib.use('TkAgg')
 
 # If set to true, include the io-expander for visualization
-IO_EXPANDER = False
+IO_EXPANDER = True
 
 # If set to true, the script generates and plays a sine wave according to the IMU sensor data
 PLAY_SOUND = False 
@@ -41,6 +45,24 @@ sem_white = '#f2f2f2'
 sem_blue = '#43788c'
 sem_dark_blue = '#2b4c59'
 sem_light_grey = '#6d848c'
+
+
+def read_isr_i2c(sw):
+    isr = sw.readFPGARegister(0x840a0)
+    enable = sw.readFPGARegister(0x84000)
+    cmd_err = isr & 0x1
+    data_err = (isr >> 1) & 0x1
+    print(f"IMU Enable: {enable}")
+    print(f"IMU ISR Command Frame Error field: {cmd_err}")
+    print(f"IMU ISR Data Frame Error field: {data_err}\n")
+    isr = sw.readFPGARegister(0x841a0)
+    enable = sw.readFPGARegister(0x84100)
+    cmd_err = isr & 0x1
+    data_err = (isr >> 1) & 0x1
+    print(f"IO_EXP Enable: {enable}")
+    print(f"IO_EXP ISR Command Frame Error field: {cmd_err}")
+    print(f"IO_EXP ISR Data Frame Error field: {data_err}\n")
+    
 
 
 def axl_conf(i2c, i2c_addr, odr: str = '12.5Hz', fs: str = '2g') -> None:
@@ -77,6 +99,24 @@ def gyro_conf(i2c, i2c_addr, odr: str = '12.5Hz', fs_g: str = '250_dps',
     i2c.writeRegister(i2c_addr, 0x11.to_bytes(1, 'big'), gyro_reg.to_bytes(1, 'big'), timeout=None)
     ctrl2_g = i2c.readRegister(i2c_addr, 0x11.to_bytes(1, 'big'), 1, timeout=None)
     print(f"Gyroscope control register value: {ctrl2_g[0]:08b}")
+
+def disable_i2c0(sw):
+    #disable i2c0 driver
+    sw.writeFPGARegister(0x84000, 0)
+    #disable stim mem 0
+    sw.writeFPGARegister(0x60000, 0)
+
+def enable_i2c0(sw):
+    sw.writeFPGARegister(0x84000, 1)
+    sw.writeFPGARegister(0x60000, 1)
+
+def disable_i2c1(sw):
+    sw.writeFPGARegister(0x84100, 0)
+    sw.writeFPGARegister(0x60100, 0)
+
+def enable_i2c1(sw):
+    sw.writeFPGARegister(0x84100, 1)
+    sw.writeFPGARegister(0x60100, 1)
 
 
 def twos_comp(val, bits: int = 16):
@@ -149,15 +189,28 @@ def main():
     """
 
     try:
-        with SmartWave().connect(reset=False, port_name=com) as sw:
-            sw.debugCallback = lambda x : print(x)
+        with SmartWave().connect(reset=False, port_name=com) as sw: 
+
             i2c_imu_addr = 0x6a  # Default I2C address
+            read_isr_i2c(sw)
+            print(getframeinfo(currentframe()).lineno)
+
+            enable_i2c0(sw)
             i2c_imu = sw.createI2CConfig(sda_pin_name="A2", scl_pin_name="A3", clock_speed=int(400e3))
+
+            read_isr_i2c(sw)
+            print(getframeinfo(currentframe()).lineno)
+
+
             try:
                 imu_id = i2c_imu.readRegister(i2c_imu_addr, 0x0f.to_bytes(1, 'big'), 1)
+                read_isr_i2c(sw)
+                print(getframeinfo(currentframe()).lineno)
+                disable_i2c0(sw)
             except:
                 try:
                     imu_id = i2c_imu.readRegister(i2c_imu_addr, 0x0f.to_bytes(1, 'big'), 1)
+                    disable_i2c0(sw)
                 except:
                     SmartWave.disconnect(sw)
                     exit("Connection to SmartWave was successful, but unable to establish connection with IMU device on address 0x6a...")
@@ -165,8 +218,23 @@ def main():
             try:
                 if IO_EXPANDER:
                     i2c_io_exp_addr = 0x20
+
+                    enable_i2c1(sw)
                     i2c_io_exp = sw.createI2CConfig(sda_pin_name="A10", scl_pin_name="A9", clock_speed=int(400e3))
-                    i2c_io_exp.write(i2c_io_exp_addr, [0xff, 0xff])
+                    read_isr_i2c(sw)
+                    print(getframeinfo(currentframe()).lineno)
+                    i2c_io_exp.write(i2c_io_exp_addr, [0x00, 0x00])
+                    read_isr_i2c(sw)
+                    print(getframeinfo(currentframe()).lineno)
+                    i2c_data = i2c_io_exp.read(i2c_io_exp_addr, 2)
+                    read_isr_i2c(sw)
+                    print(getframeinfo(currentframe()).lineno)
+                    disable_i2c1(sw)
+
+                    if i2c_data.ack_device_id is False:
+                        print("Error, couldn't connect to IO expander!")
+                    elif i2c_data.ack_device_id is True:
+                        print("Successfully connected to IO expander")
             except Exception as e:
                 print('unable to connect to IO expander...')
                 print(e)
@@ -177,9 +245,23 @@ def main():
             else:
                 print(f"Connection was successful. Device ID: {imu_id[0]:#0x}")
 
-            # Configure the ASM330LHHXG1 IMU
-            axl_conf(i2c_imu, i2c_imu_addr)
-            gyro_conf(i2c_imu, i2c_imu_addr)
+            # add tags on display for i2ct
+            # SmartWaveAPI.configitems.GPIO.color = "#1E88E5"
+            # sw.createGPIO("A1", "SDA_T")
+            # sw.createGPIO("A7", "SCL_T")
+
+            try:
+                # Configure the ASM330LHHXG1 IMU
+                enable_i2c0(sw)
+                axl_conf(i2c_imu, i2c_imu_addr)
+                read_isr_i2c(sw)
+                print(getframeinfo(currentframe()).lineno)
+                gyro_conf(i2c_imu, i2c_imu_addr)
+                print('IMU successfully configured')
+                disable_i2c0(sw)
+            except:
+                print('error in configuring IMU')
+                exit()
 
             # Import semify logo for plotting
             file = "../../IMU_sensor_demo/python/semify_logo.png"
@@ -253,7 +335,7 @@ def main():
                 :return: Data for plotting
                 """
                 try:
-                
+                    enable_i2c0(sw)
                     pitch_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x22.to_bytes(1, 'big'), 1)
                     pitch_msb = i2c_imu.readRegister(i2c_imu_addr, 0x23.to_bytes(1, 'big'), 1)
                     pitch = (pitch_msb[0] << 8) + pitch_lsb[0]
@@ -333,9 +415,13 @@ def main():
                     ys[2] = ys[2][-x_len:]
                     line[2].set_ydata(ys[2])
 
+                    disable_i2c0(sw)
+    
                     if IO_EXPANDER:
                         try:
+                            enable_i2c1(sw)
                             io_led_toggle(i2c_io_exp, i2c_io_exp_addr, y_res, x_res)
+                            disable_i2c1(sw) 
                         except:
                             print('unable to toggle IO leds')
                             exit()
