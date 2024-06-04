@@ -19,6 +19,7 @@ from SmartWaveAPI import SmartWave
 import SmartWaveAPI
 from imu_conf_lib import *
 from sys import argv, exit
+import sys
 from inspect import currentframe, getframeinfo
 
 
@@ -170,15 +171,29 @@ def fall_detected(sample):
 
     # debounce the fall detection
     if(default_timer() - fall_detected.start_fall > 0.3):
-        if((sample[3] > 0x0800 and sample[3] < 0x3f00) or
-           (sample[4] > 0x0800 and sample[4] < 0x3f00) or
-           (sample[5] > 0x0800 and sample[5] < 0x3f00)):
+        if((sample[3] > 0x0700 and sample[3] < 0x3f00) or
+           (sample[4] > 0x0700 and sample[4] < 0x3f00) or
+           (sample[5] > 0x0700 and sample[5] < 0x3f00)):
             fall_detected.start_fall = default_timer()
             return True
     
     return False
 
 fall_detected.start_fall = -0.3
+
+# Import semify logo for plotting
+file = "../../IMU_sensor_demo/python/semify_logo.png"
+img = Image.open(file)
+resize = img.resize((np.array(img.size) / 19).astype(int))  # / 17
+
+
+sensor_emulation = False
+imu_addr = 0x6a  # Default I2C address
+emulated_addr = 0x7a # emulated I2C address
+i2c_addr = emulated_addr if sensor_emulation else imu_addr
+edge = False
+previous = False
+
 
 def main():
     """
@@ -191,25 +206,20 @@ def main():
     try:
         with SmartWave().connect(reset=False, port_name=com) as sw: 
 
-            i2c_imu_addr = 0x6a  # Default I2C address
-            read_isr_i2c(sw)
-            print(getframeinfo(currentframe()).lineno)
+            # add tags on display for i2ct
+            SmartWaveAPI.configitems.GPIO.color = "#1E88E5"
+            sw.createGPIO("A1", "EMU SDA")
+            sw.createGPIO("A7", "EMU SCL")
 
             enable_i2c0(sw)
-            i2c_imu = sw.createI2CConfig(sda_pin_name="A2", scl_pin_name="A3", clock_speed=int(400e3))
-
-            read_isr_i2c(sw)
-            print(getframeinfo(currentframe()).lineno)
-
+            i2c_imu = sw.createI2CConfig(sda_pin_name="A2", scl_pin_name="A3", sda_display_name="IMU SDA", scl_display_name="IMU SCL", clock_speed=int(400e3))
 
             try:
-                imu_id = i2c_imu.readRegister(i2c_imu_addr, 0x0f.to_bytes(1, 'big'), 1)
-                read_isr_i2c(sw)
-                print(getframeinfo(currentframe()).lineno)
+                imu_id = i2c_imu.readRegister(i2c_addr, 0x0f.to_bytes(1, 'big'), 1)
                 disable_i2c0(sw)
             except:
                 try:
-                    imu_id = i2c_imu.readRegister(i2c_imu_addr, 0x0f.to_bytes(1, 'big'), 1)
+                    imu_id = i2c_imu.readRegister(i2c_addr, 0x0f.to_bytes(1, 'big'), 1)
                     disable_i2c0(sw)
                 except:
                     SmartWave.disconnect(sw)
@@ -220,15 +230,9 @@ def main():
                     i2c_io_exp_addr = 0x20
 
                     enable_i2c1(sw)
-                    i2c_io_exp = sw.createI2CConfig(sda_pin_name="A10", scl_pin_name="A9", clock_speed=int(400e3))
-                    read_isr_i2c(sw)
-                    print(getframeinfo(currentframe()).lineno)
+                    i2c_io_exp = sw.createI2CConfig(sda_pin_name="A10", scl_pin_name="A9", sda_display_name="IO SDA", scl_display_name="IO SCL", clock_speed=int(400e3))
                     i2c_io_exp.write(i2c_io_exp_addr, [0x00, 0x00])
-                    read_isr_i2c(sw)
-                    print(getframeinfo(currentframe()).lineno)
                     i2c_data = i2c_io_exp.read(i2c_io_exp_addr, 2)
-                    read_isr_i2c(sw)
-                    print(getframeinfo(currentframe()).lineno)
                     disable_i2c1(sw)
 
                     if i2c_data.ack_device_id is False:
@@ -245,28 +249,20 @@ def main():
             else:
                 print(f"Connection was successful. Device ID: {imu_id[0]:#0x}")
 
-            # add tags on display for i2ct
-            # SmartWaveAPI.configitems.GPIO.color = "#1E88E5"
-            # sw.createGPIO("A1", "SDA_T")
-            # sw.createGPIO("A7", "SCL_T")
-
             try:
                 # Configure the ASM330LHHXG1 IMU
                 enable_i2c0(sw)
-                axl_conf(i2c_imu, i2c_imu_addr)
-                read_isr_i2c(sw)
-                print(getframeinfo(currentframe()).lineno)
-                gyro_conf(i2c_imu, i2c_imu_addr)
+
+                axl_conf(i2c_imu, imu_addr)
+                gyro_conf(i2c_imu, imu_addr)
+                # axl_conf(i2c_imu, emulated_addr)
+                # gyro_conf(i2c_imu, emulated_addr)
+
                 print('IMU successfully configured')
                 disable_i2c0(sw)
             except:
                 print('error in configuring IMU')
                 exit()
-
-            # Import semify logo for plotting
-            file = "../../IMU_sensor_demo/python/semify_logo.png"
-            img = Image.open(file)
-            resize = img.resize((np.array(img.size) / 19).astype(int))  # / 17
 
             # Default settings for plotting
             plt.rcParams["figure.facecolor"] = sem_grey
@@ -274,6 +270,7 @@ def main():
             plt.rcParams["figure.autolayout"] = True
             x_len = 200
 
+            global fig
             fig = plt.figure()
             gs = fig.add_gridspec(3, 2)
             ax1 = fig.add_subplot(gs[0, 0])
@@ -284,6 +281,15 @@ def main():
             ax6 = fig.add_subplot(gs[2, 1])
 
             fig.suptitle("Inertial Measurement Unit\nData Visualization", color=sem_white)
+
+            xmax = fig.bbox.xmax
+            ymax = fig.bbox.ymax
+
+            # plt.figimage(resize, xo=int(fig.bbox.xmax // 2) + 650, yo=int(fig.bbox.ymax) + 220)
+            fig.text(x=0.05, y=0.95 , s='Sensor Emulation: ', color=sem_white, fontsize='large')
+            fig.text(x=0.213, y=0.949 , s='OFF', color='#dd0000', fontsize='x-large', fontweight='extra bold')
+            fig.text(x=0.213, y=0.949 , s='ON', color='#00dd00', fontsize='x-large', fontweight='extra bold', visible=False)
+
             ax1.set_title("X - axis", color=sem_white)
             ax2.set_title("Y - axis", color=sem_white)
             ax3.set_title("Z - axis", color=sem_white)
@@ -334,20 +340,63 @@ def main():
                 :param ys: List that contains data for plotting the linear rate of change
                 :return: Data for plotting
                 """
+                
                 try:
+                    global sensor_emulation
+                    global i2c_addr
+                    global imu_addr
+                    global emulated_addr
+                    global edge
+                    global previous
+                    global fig
+
+                    # fig.text(0, 0, "Sensor Emulation", color='red', fontsize='x-large')
+
+                    # detect switch between sensor emulation ond pysical imu
+                    if(keyboard.is_pressed('space')):
+                        if(not previous):
+                            edge = True
+                        else:
+                            edge = False
+                        if(edge):
+                            sensor_emulation = not sensor_emulation
+                            i2c_addr = emulated_addr if sensor_emulation else imu_addr
+
+                            if(sensor_emulation):
+                                for t in fig.texts:
+                                    if(t.get_text() == 'ON'):
+                                        t.set_visible(True)
+                                    if(t.get_text() == 'OFF'):
+                                        t.set_visible(False)
+
+                            if(not sensor_emulation):
+                                for t in fig.texts:
+                                    if(t.get_text() == 'ON'):
+                                        t.set_visible(False)
+                                    if(t.get_text() == 'OFF'):
+                                        t.set_visible(True)
+                                
+                            fig.show()
+
+                        previous = True
+                    else:
+                        previous = False
+                        edge = False
+                    
+
                     enable_i2c0(sw)
-                    pitch_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x22.to_bytes(1, 'big'), 1)
-                    pitch_msb = i2c_imu.readRegister(i2c_imu_addr, 0x23.to_bytes(1, 'big'), 1)
+                    pitch_lsb = i2c_imu.readRegister(i2c_addr, 0x22.to_bytes(1, 'big'), 1)
+                    pitch_msb = i2c_imu.readRegister(i2c_addr, 0x23.to_bytes(1, 'big'), 1)
                     pitch = (pitch_msb[0] << 8) + pitch_lsb[0]
                     tc_pitch = twos_comp(pitch)
 
-                    roll_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x24.to_bytes(1, 'big'), 1)
-                    roll_msb = i2c_imu.readRegister(i2c_imu_addr, 0x25.to_bytes(1, 'big'), 1)
+                    roll_lsb = i2c_imu.readRegister(i2c_addr, 0x24.to_bytes(1, 'big'), 1)
+                    roll_msb = i2c_imu.readRegister(i2c_addr, 0x25.to_bytes(1, 'big'), 1)
                     roll = (roll_msb[0] << 8) + roll_lsb[0]
                     tc_roll = twos_comp(roll)
 
-                    yaw_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x26.to_bytes(1, 'big'), 1)
-                    yaw_msb = i2c_imu.readRegister(i2c_imu_addr, 0x27.to_bytes(1, 'big'), 1)
+                    yaw_lsb = i2c_imu.readRegister(i2c_addr, 0x26.to_bytes(1, 'big'), 1)
+                    yaw_msb = i2c_imu.readRegister(i2c_addr, 0x27.to_bytes(1, 'big'), 1)
                     yaw = (yaw_msb[0] << 8) + yaw_lsb[0]
                     tc_yaw = twos_comp(yaw)
 
@@ -371,18 +420,18 @@ def main():
                     line[5].set_ydata(ys[5])
 
                     # Linear acceleration sensor
-                    x_axis_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x28.to_bytes(1, 'big'), 1)
-                    x_axis_msb = i2c_imu.readRegister(i2c_imu_addr, 0x29.to_bytes(1, 'big'), 1)
+                    x_axis_lsb = i2c_imu.readRegister(i2c_addr, 0x28.to_bytes(1, 'big'), 1)
+                    x_axis_msb = i2c_imu.readRegister(i2c_addr, 0x29.to_bytes(1, 'big'), 1)
                     x_axis = (x_axis_msb[0] << 8) + x_axis_lsb[0]
                     tc_x_axis = twos_comp(x_axis, 16)
 
-                    y_axis_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x2A.to_bytes(1, 'big'), 1)
-                    y_axis_msb = i2c_imu.readRegister(i2c_imu_addr, 0x2B.to_bytes(1, 'big'), 1)
+                    y_axis_lsb = i2c_imu.readRegister(i2c_addr, 0x2A.to_bytes(1, 'big'), 1)
+                    y_axis_msb = i2c_imu.readRegister(i2c_addr, 0x2B.to_bytes(1, 'big'), 1)
                     y_axis = (y_axis_msb[0] << 8) + y_axis_lsb[0]
                     tc_y_axis = twos_comp(y_axis, 16)
 
-                    z_axis_lsb = i2c_imu.readRegister(i2c_imu_addr, 0x2C.to_bytes(1, 'big'), 1)
-                    z_axis_msb = i2c_imu.readRegister(i2c_imu_addr, 0x2D.to_bytes(1, 'big'), 1)
+                    z_axis_lsb = i2c_imu.readRegister(i2c_addr, 0x2C.to_bytes(1, 'big'), 1)
+                    z_axis_msb = i2c_imu.readRegister(i2c_addr, 0x2D.to_bytes(1, 'big'), 1)
                     z_axis = (z_axis_msb[0] << 8) + z_axis_lsb[0]
                     tc_z_axis = twos_comp(z_axis, 16)
 
@@ -420,7 +469,10 @@ def main():
                     if IO_EXPANDER:
                         try:
                             enable_i2c1(sw)
-                            io_led_toggle(i2c_io_exp, i2c_io_exp_addr, y_res, x_res)
+                            if(sensor_emulation):
+                                io_led_toggle(i2c_io_exp, i2c_io_exp_addr, x_res, y_res)
+                            else:
+                                io_led_toggle(i2c_io_exp, i2c_io_exp_addr, y_res, x_res)
                             disable_i2c1(sw) 
                         except:
                             print('unable to toggle IO leds')
@@ -445,9 +497,9 @@ def main():
                     return line
 
                 except Exception as e:
+                    print("Error on line {}".format(sys.exc_info()[-1].tb_lineno))
                     print("Connection to IMU unit has been interrupted. Terminating Program.")
                     print(e)
-                    print('\n\n\n')
                     SmartWave.disconnect(sw)
                     exit()
 
@@ -457,10 +509,7 @@ def main():
                                         blit=True,
                                         cache_frame_data=False)
 
-            # plt.figimage(resize, xo=int(fig.bbox.xmax // 2) + 250, yo=int(fig.bbox.ymax) + 220)
-            # plt.figimage(resize, xo=int(fig.bbox.xmax // 2) + 650, yo=int(fig.bbox.ymax) + 220)
             plt.figimage(resize, origin='upper')
-            # plt.get_current_fig_manager().full_screen_toggle()
             plt.show()
     except Exception as e:
         print(e)
