@@ -78,8 +78,8 @@ def axl_conf(i2c, i2c_addr, odr: str = '12.5Hz', fs: str = '2g') -> None:
     """
     axl_reg = ((axl_odr[odr] << 4) + (axl_fs[fs] << 2))
     i2c.writeRegister(i2c_addr, 0x10.to_bytes(1, 'big'), axl_reg.to_bytes(1, 'big'), timeout=None)
-    ctrl1_xl = i2c.readRegister(i2c_addr, 0x10.to_bytes(1, 'big'), 1, timeout=None)
-    print(f"Accelerometer control register value: {ctrl1_xl[0]:08b}")
+    # ctrl1_xl = i2c.readRegister(i2c_addr, 0x10.to_bytes(1, 'big'), 1, timeout=None)
+    # print(f"Accelerometer control register value: {ctrl1_xl[0]:08b}")
 
 
 def gyro_conf(i2c, i2c_addr, odr: str = '12.5Hz', fs_g: str = '250_dps',
@@ -98,8 +98,8 @@ def gyro_conf(i2c, i2c_addr, odr: str = '12.5Hz', fs_g: str = '250_dps',
     gyro_reg = ((gyro_odr[odr] << 4) + (gyro_fs_g[fs_g] << 2) +
                 (gyro_fs_125[fs_125] << 1) + gyro_fs_4000[fs_4000])
     i2c.writeRegister(i2c_addr, 0x11.to_bytes(1, 'big'), gyro_reg.to_bytes(1, 'big'), timeout=None)
-    ctrl2_g = i2c.readRegister(i2c_addr, 0x11.to_bytes(1, 'big'), 1, timeout=None)
-    print(f"Gyroscope control register value: {ctrl2_g[0]:08b}")
+    # ctrl2_g = i2c.readRegister(i2c_addr, 0x11.to_bytes(1, 'big'), 1, timeout=None)
+    # print(f"Gyroscope control register value: {ctrl2_g[0]:08b}")
 
 def disable_i2c0(sw):
     #disable i2c0 driver
@@ -216,6 +216,9 @@ def read_button(sw):
     button = int(not button)
     print(f'button: {button}')
 
+def read_output_sel0(sw):
+    print("Pinmux Output Sel 0 : \n0x%x\n" % sw.readFPGARegister(0x46000))
+
 
 # Import semify logo for plotting
 file = "../../IMU_sensor_demo/python/semify_logo.png"
@@ -242,11 +245,14 @@ def main():
     try:
         with SmartWave().connect(reset=False, port_name=com) as sw: 
 
-            # add tags on display for i2ct
+            # add tags on display for i2ct and button
+            sw.createGPIO("A4", "BTN")
             SmartWaveAPI.configitems.GPIO.color = "#1E88E5"
             sw.createGPIO("A1", "EMU SDA")
             sw.createGPIO("A7", "EMU SCL")
 
+            #TODO
+            #configure pinmux to output/input TSDA and TSCL on pins A1 and A7
             enable_i2c0(sw)
             i2c_imu = sw.createI2CConfig(sda_pin_name="A2", scl_pin_name="A3", sda_display_name="IMU SDA", scl_display_name="IMU SCL", clock_speed=int(400e3))
 
